@@ -36,60 +36,34 @@ object ParamHelpText {
 
     val sections: Map<String, ParamHelp> = mapOf(
         GRAIN to ParamHelp(
-            title = "Grain",
-            summary = "The fine, sparkly texture that makes film look like film.",
-            body = "Real film is built from microscopic light-sensitive particles, and their random " +
-                "clumping is what you see as grain. Bigger particles — a faster, higher-ISO film — give " +
-                "coarser, more visible grain; the per-channel scales let one colour layer be grainier " +
-                "than the others. Turn it down for a clean, modern look or up for a gritty, vintage one. " +
-                "Grain is measured in microns, so it can look finer in the small on-screen preview than " +
-                "in your full-resolution export.",
+            title = "颗粒",
+            summary = "让胶片呈现独特质感的细密颗粒纹理。",
+            body = "真实胶片由微小的感光颗粒组成，颗粒随机聚集，便形成了可见的颗粒感。颗粒越大（感光度 ISO 越高），纹理就越粗、越明显；各通道的缩放可让某一色层比其他色层更有颗粒感。降低可获得干净现代的效果，提高则更粗粝复古。颗粒以微米为单位，因此在屏幕小预览中可能比全分辨率导出时更细。",
         ),
         HALATION to ParamHelp(
-            title = "Halation",
-            summary = "The soft reddish glow that blooms around bright highlights.",
-            body = "On real film, strong light passes through the emulsion, reflects off the back of " +
-                "the base and re-exposes the film around bright areas — street lamps, the sun through " +
-                "leaves, specular highlights. \"Halation amount\" sets how strong that glow is, while " +
-                "\"scatter\" adds a broader, subtler spread of light inside the emulsion; \"Boost EV\" " +
-                "decides how bright a highlight must be before it blooms. Raise it for a dreamy, " +
-                "cinematic look, or switch the whole section off for clinical, digital-clean highlights.",
+            title = "光晕",
+            summary = "明亮高光周围柔和泛红的辉光。",
+            body = "在真实胶片中，强光穿过乳剂，经片基背面反射后，会在路灯、透过树叶的阳光、镜面高光等明亮区域周围再次曝光。“光晕量”控制辉光强度，“散射”模拟乳剂内范围更广、更柔和的光扩散；“提升 EV”决定高光达到多亮时才产生辉光。提高可获得梦幻的电影感，关闭整个分区则让高光干净利落。",
         ),
         COUPLERS to ParamHelp(
-            title = "Film colour character (couplers)",
-            summary = "Film's signature colour separation, edge punch and saturation roll-off.",
-            body = "As film develops, dye forming in one colour layer chemically holds back its " +
-                "neighbours — the \"DIR coupler\" effect. That crosstalk is a big part of why film " +
-                "colours look the way they do: crisper edges and a distinctive, non-linear saturation. " +
-                "\"Effect strength\" scales the whole character, and the cross-colour controls set how " +
-                "much each colour bleeds into the others. This is a character control, not a plain " +
-                "saturation slider — for ordinary \"more / less colourful\", use Saturation / Vibrance " +
-                "under Output.",
+            title = "胶片色彩特性（成色剂）",
+            summary = "胶片独有的色彩分离、边缘力度与饱和度过渡。",
+            body = "胶片显影时，一个色层中形成的染料会通过化学作用抑制相邻色层，这就是“DIR 成色剂”效应。这种层间影响造就了胶片独特的色彩：更鲜明的边缘，以及独特的非线性饱和度。“效果强度”调整整体特性，跨色控制则决定各颜色之间的相互影响程度。这是色彩风格控制；如需常规增减色彩浓度，请使用“输出”中的“饱和度”和“自然饱和度”。",
         ),
         PRINT_GAMMA to ParamHelp(
-            title = "Film & print contrast (gamma)",
-            summary = "The raw contrast baked into the negative and the print paper.",
-            body = "Every film and paper has a characteristic curve, and its \"gamma\" is how steep " +
-                "that curve is — the photochemical equivalent of a contrast control. A higher print " +
-                "gamma gives a punchier, higher-contrast print; lower flattens it out. For everyday " +
-                "contrast tweaks reach for the Contrast slider first; these are the underlying " +
-                "photochemical knobs for shaping the backbone of the look.",
+            title = "胶片与印相对比度（伽马）",
+            summary = "负片和相纸本身的基础对比度。",
+            body = "每种胶片和相纸都有特性曲线，“伽马”表示曲线的陡峭程度，相当于光化学过程中的对比度控制。提高印相伽马会让照片更有力度、对比更强；降低则更平缓。日常微调请优先使用“对比度”滑块；这些基础光化学参数用于塑造影调骨架。",
         ),
         PREFLASH to ParamHelp(
-            title = "Preflash",
-            summary = "A faint, even pre-exposure of the paper that tames harsh contrast.",
-            body = "Darkroom printers sometimes flash the paper with a low, uniform light before the " +
-                "real exposure. That lifts the deepest shadows and gently lowers contrast in the print " +
-                "without touching the highlights. Raise \"Exposure\" for softer, more open shadows; the " +
-                "Y and M filter shifts tint that pre-flash light, the same way enlarger filtration does.",
+            title = "预闪光",
+            summary = "用微弱均匀的光预先曝光相纸，柔化强烈对比。",
+            body = "暗房印相有时会在正式曝光前，用微弱均匀的光预闪相纸。这能提亮最深的阴影，温和降低印相对比度，同时保留高光。提高“曝光”可让阴影更柔和、细节更通透；Y 和 M 滤色偏移可改变预闪光的色调，原理与放大机滤色相同。",
         ),
         GLARE to ParamHelp(
-            title = "Glare",
-            summary = "Veiling haze from light scattering across the print surface.",
-            body = "This models stray light bouncing around the print and scanner, lifting the blacks a " +
-                "little and laying a soft haze over the image. It is a random (stochastic) effect, so it " +
-                "is left off by default and is not part of the exact, repeatable export. Raise " +
-                "\"Percent\" for a hazier, lower-contrast, more nostalgic feel.",
+            title = "眩光",
+            summary = "光线在印相表面散射形成的薄雾感。",
+            body = "此项模拟印相和扫描器内部的杂散反射光，略微抬升黑位，为画面蒙上柔和薄雾。它具有随机性，因此默认关闭，也不包含在要求精确、可重复的导出中。提高“百分比”可增强雾感、降低对比，营造更怀旧的氛围。",
         ),
     )
 

@@ -52,3 +52,12 @@ __pycache__/
 
 # Ephemeral agent worktrees (Claude Code isolation)
 .claude/worktrees/
+
+# Chinese UI v2 local-only build material
+*.p12
+*.dpapi
+*.idsig
+/tools/film-references/render_reference.exe
+/tools/film-references/*.f32
+/tools/film-references/baseline.jpg
+/tools/film-references/film_references/

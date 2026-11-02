@@ -18,9 +18,9 @@ import com.spectrafilm.engine.ColorSpace
 
 /** App theme preference. */
 enum class ThemeMode(val display: String) {
-    SYSTEM("System default"),
-    LIGHT("Light"),
-    DARK("Dark"),
+    SYSTEM("跟随系统"),
+    LIGHT("浅色"),
+    DARK("深色"),
 }
 
 /**

@@ -1,11 +1,31 @@
 {
   "version": 1,
   "groups": [
-    { "id": "color_negative", "title": "Color Negative (Still)", "order": 1 },
-    { "id": "color_reversal", "title": "Color Reversal / Slide", "order": 2 },
-    { "id": "motion_picture_negative", "title": "Motion-Picture Negative", "order": 3 },
-    { "id": "print_film", "title": "Motion-Picture Print Film", "order": 4 },
-    { "id": "print_paper", "title": "RGB Print Paper", "order": 5 }
+    {
+      "id": "color_negative",
+      "title": "彩色负片（静态摄影）",
+      "order": 1
+    },
+    {
+      "id": "color_reversal",
+      "title": "彩色反转片／幻灯片",
+      "order": 2
+    },
+    {
+      "id": "motion_picture_negative",
+      "title": "电影摄影负片",
+      "order": 3
+    },
+    {
+      "id": "print_film",
+      "title": "电影拷贝正片",
+      "order": 4
+    },
+    {
+      "id": "print_paper",
+      "title": "彩色印相纸",
+      "order": 5
+    }
   ],
   "stocks": {
     "kodak_portra_160": {
@@ -17,7 +37,7 @@
       "balance": "daylight",
       "year": "2010",
       "order": 10,
-      "summary": "Fine-grained, low-contrast portrait negative with soft, natural skin tones and gentle color."
+      "summary": "细颗粒、低对比的人像负片，肤色柔和自然，色彩温润。"
     },
     "kodak_portra_400": {
       "name": "Kodak Portra 400",
@@ -28,7 +48,7 @@
       "balance": "daylight",
       "year": "2010",
       "order": 11,
-      "summary": "Warm, forgiving, and gentle on skin; the classic all-round wedding and portrait negative."
+      "summary": "色调温暖、宽容度高，肤色柔和，是婚礼与人像摄影的经典全能负片。"
     },
     "kodak_portra_800": {
       "name": "Kodak Portra 800",
@@ -39,7 +59,7 @@
       "balance": "daylight",
       "year": "2010",
       "order": 12,
-      "summary": "One of the last fast color negatives, holding Portra's natural palette into low light."
+      "summary": "少数仍在生产的高速彩色负片之一，在弱光下依然保留 Portra 自然的色彩。"
     },
     "kodak_portra_800_push1": {
       "name": "Kodak Portra 800 (Push +1)",
@@ -50,7 +70,7 @@
       "balance": "daylight",
       "year": "2010",
       "order": 13,
-      "summary": "Portra 800 rated at EI 1600 and pushed one stop for added speed, contrast, and grain."
+      "summary": "Portra 800 按 EI 1600 曝光并增感一档，提升感光度、对比度与颗粒感。"
     },
     "kodak_portra_800_push2": {
       "name": "Kodak Portra 800 (Push +2)",
@@ -61,7 +81,7 @@
       "balance": "daylight",
       "year": "2010",
       "order": 14,
-      "summary": "Portra 800 rated at EI 3200 and pushed two stops for available-light work, with bold grain and contrast."
+      "summary": "Portra 800 按 EI 3200 曝光并增感两档，适合现场光摄影，颗粒与对比更鲜明。"
     },
     "kodak_ektar_100": {
       "name": "Kodak Ektar 100",
@@ -72,7 +92,7 @@
       "balance": "daylight",
       "year": "2008",
       "order": 15,
-      "summary": "The world's finest-grain color negative, prized for vivid, saturated landscape color."
+      "summary": "号称全球颗粒最细的彩色负片，以鲜艳饱满的风光色彩著称。"
     },
     "kodak_gold_200": {
       "name": "Kodak Gold 200",
@@ -83,7 +103,7 @@
       "balance": "daylight",
       "year": "1988",
       "order": 16,
-      "summary": "A nostalgic consumer film with warm yellows and golds made for sunny, golden-hour snapshots."
+      "summary": "带有温暖黄色与金色调的怀旧消费级胶片，适合晴天与黄金时刻随拍。"
     },
     "kodak_ultramax_400": {
       "name": "Kodak UltraMax 400",
@@ -94,7 +114,7 @@
       "balance": "daylight",
       "year": "2007",
       "order": 17,
-      "summary": "A punchy, versatile consumer 400 with vibrant color and a pleasing, gritty grain."
+      "summary": "表现鲜明、用途广泛的消费级 ISO 400 胶片，色彩鲜艳，颗粒粗粝而悦目。"
     },
     "fujifilm_pro_400h": {
       "name": "Fujifilm Pro 400H",
@@ -105,7 +125,7 @@
       "balance": "daylight",
       "year": "2004",
       "order": 18,
-      "summary": "A discontinued professional film famed for airy pastels, cool greens, and soft skin via its fourth color layer."
+      "summary": "已停产的专业胶片，第四感色层带来通透粉彩、清凉绿色与柔和肤色。"
     },
     "fujifilm_c200": {
       "name": "Fujifilm C200",
@@ -116,7 +136,7 @@
       "balance": "daylight",
       "year": "1990",
       "order": 19,
-      "summary": "An economical everyday negative with crisp, slightly cool color and accurate skin tones."
+      "summary": "经济实用的日常负片，色彩清晰、略偏冷，肤色还原准确。"
     },
     "fujifilm_xtra_400": {
       "name": "Fujifilm Superia X-TRA 400",
@@ -127,7 +147,7 @@
       "balance": "daylight",
       "year": "1998",
       "order": 20,
-      "summary": "A versatile consumer 400 with a fourth color layer for cleaner tones under mixed light."
+      "summary": "用途广泛的消费级 ISO 400 胶片，第四感色层让混合光下的色调更纯净。"
     },
     "kodak_ektachrome_100": {
       "name": "Kodak Ektachrome E100",
@@ -138,7 +158,7 @@
       "balance": "daylight",
       "year": "2018",
       "order": 10,
-      "summary": "A revived E-6 slide with clean neutrals, fine grain, and a wide tonal range for a reversal film."
+      "summary": "重新推出的 E-6 幻灯片，中性色纯净、颗粒细腻，在反转片中具有较宽的影调范围。"
     },
     "fujifilm_provia_100f": {
       "name": "Fujifilm Provia 100F",
@@ -149,7 +169,7 @@
       "balance": "daylight",
       "year": "2000",
       "order": 11,
-      "summary": "The reference E-6 transparency: natural, accurate color with modest contrast and fine grain."
+      "summary": "经典 E-6 透明正片，自然准确的色彩、适度的对比与细腻的颗粒兼备。"
     },
     "fujifilm_velvia_100": {
       "name": "Fujifilm Velvia 100",
@@ -160,7 +180,7 @@
       "balance": "daylight",
       "year": "2005",
       "order": 12,
-      "summary": "High-contrast, ultra-saturated slide film beloved by landscape shooters for its punchy color."
+      "summary": "高对比、超高饱和度的幻灯片，因鲜明色彩而深受风光摄影师喜爱。"
     },
     "kodak_kodachrome_64": {
       "name": "Kodak Kodachrome 64",
@@ -171,7 +191,7 @@
       "balance": "daylight",
       "year": "1974",
       "order": 13,
-      "summary": "The legendary K-14 slide (discontinued 2009) with rich, archival color and a distinctive warm signature."
+      "summary": "传奇 K-14 幻灯片（2009 年停产），色彩浓郁持久，具有独特暖调。"
     },
     "kodak_vision3_50d": {
       "name": "Kodak Vision3 50D (5203/7203)",
@@ -182,7 +202,7 @@
       "balance": "daylight",
       "year": "2010",
       "order": 10,
-      "summary": "The sharpest, finest-grained Vision3 stock, daylight-balanced for crisp bright-light cinematography."
+      "summary": "Vision3 系列中最锐利、颗粒最细的日光型胶片，适合明亮环境下清晰的电影摄影。"
     },
     "kodak_vision3_250d": {
       "name": "Kodak Vision3 250D (5207/7207)",
@@ -193,7 +213,7 @@
       "balance": "daylight",
       "year": "2009",
       "order": 11,
-      "summary": "A medium-speed daylight cine negative balancing fine grain with broad exposure latitude."
+      "summary": "中速日光型电影负片，兼顾细颗粒与宽广的曝光宽容度。"
     },
     "kodak_vision3_200t": {
       "name": "Kodak Vision3 200T (5213/7213)",
@@ -204,7 +224,7 @@
       "balance": "tungsten",
       "year": "2010",
       "order": 12,
-      "summary": "A tungsten-balanced cine negative offering low grain and rich color under artificial light."
+      "summary": "钨丝灯型电影负片，在人工光源下呈现低颗粒与丰富色彩。"
     },
     "kodak_vision3_500t": {
       "name": "Kodak Vision3 500T (5219/7219)",
@@ -215,7 +235,7 @@
       "balance": "tungsten",
       "year": "2007",
       "order": 13,
-      "summary": "The fast, tungsten-balanced workhorse of digital-era film, strong in low light with wide dynamic range."
+      "summary": "数字时代电影摄影常用的高速钨丝灯型胶片，弱光表现出色，动态范围宽广。"
     },
     "kodak_verita_200d": {
       "name": "Kodak Verita 200D (5206/7206)",
@@ -226,7 +246,7 @@
       "balance": "daylight",
       "year": "2026",
       "order": 14,
-      "summary": "A new daylight cine negative with bold saturation, warm skin, and a shorter, classically cinematic range."
+      "summary": "新款日光型电影负片，饱和度鲜明、肤色温暖，影调范围更紧凑，富有经典电影感。"
     },
     "kodak_2383": {
       "name": "Kodak Vision Color Print Film 2383",
@@ -236,7 +256,7 @@
       "balance": "tungsten",
       "year": "2000",
       "order": 10,
-      "summary": "The standard theatrical release print stock, giving rich blacks and neutral highlights on screen."
+      "summary": "标准影院发行拷贝胶片，在银幕上呈现浓郁黑位与中性高光。"
     },
     "kodak_2393": {
       "name": "Kodak Vision Premier Color Print Film 2393",
@@ -246,7 +266,7 @@
       "balance": "tungsten",
       "year": "1998",
       "order": 11,
-      "summary": "A premium print stock with deeper blacks, brighter highlights, and greater color saturation than 2383."
+      "summary": "高端电影拷贝胶片，比 2383 拥有更深的黑位、更明亮的高光和更高的色彩饱和度。"
     },
     "kodak_portra_endura": {
       "name": "Kodak Professional Portra Endura",
@@ -255,7 +275,7 @@
       "kind": "print_paper",
       "year": "2005",
       "order": 10,
-      "summary": "A low-contrast RA-4 paper delivering natural flesh tones and moderate, restrained color saturation."
+      "summary": "低对比 RA-4 相纸，肤色自然，色彩饱和度适中而克制。"
     },
     "kodak_supra_endura": {
       "name": "Kodak Professional Supra Endura",
@@ -264,7 +284,7 @@
       "kind": "print_paper",
       "year": "2003",
       "order": 11,
-      "summary": "A moderate-contrast RA-4 paper with accurate skin and livelier saturation for vivid general prints."
+      "summary": "中等对比度 RA-4 相纸，肤色准确、饱和度更活泼，适合鲜艳的日常印相。"
     },
     "kodak_ultra_endura": {
       "name": "Kodak Professional Ultra Endura",
@@ -273,7 +293,7 @@
       "kind": "print_paper",
       "year": "2003",
       "order": 12,
-      "summary": "A high-contrast RA-4 paper with blacker blacks and bold saturation for high-impact display prints."
+      "summary": "高对比 RA-4 相纸，黑位更深、饱和度鲜明，适合富有视觉冲击力的展示照片。"
     },
     "kodak_endura_premier": {
       "name": "Kodak Professional Endura Premier",
@@ -282,7 +302,7 @@
       "kind": "print_paper",
       "year": "2010",
       "order": 13,
-      "summary": "Kodak's last surviving RA-4 paper, with tunable contrast and exceptional 100+ year image stability."
+      "summary": "Kodak 目前仍在生产的 RA-4 相纸，对比度可调，影像稳定性出色，可保存百年以上。"
     },
     "kodak_ektacolor_edge": {
       "name": "Kodak Ektacolor Edge",
@@ -291,7 +311,7 @@
       "kind": "print_paper",
       "year": "1997",
       "order": 14,
-      "summary": "A consumer/minilab RA-4 paper tuned for natural skin tones and rich, compelling everyday color."
+      "summary": "面向消费与小型冲印的 RA-4 相纸，兼顾自然肤色和浓郁动人的日常色彩。"
     },
     "fujifilm_crystal_archive_typeii": {
       "name": "Fujifilm Crystal Archive Type II",
@@ -300,7 +320,7 @@
       "kind": "print_paper",
       "year": "2005",
       "order": 15,
-      "summary": "Fuji's benchmark RA-4 paper with rich gradation, vivid color, and outstanding color stability."
+      "summary": "Fuji 经典 RA-4 相纸，层次丰富、色彩鲜艳，色彩稳定性出色。"
     }
   }
 }

@@ -42,6 +42,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.expandVertically
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -949,7 +950,7 @@ class MainActivity : ComponentActivity() {
             } else screenState.SaveableStateProvider(screen) {
                 when (screen) {
                     Screen.EDITOR -> key(editorCompositionGeneration) {
-                        EditorScreen(
+                        SpektraTheme(dark = true, dynamicColor = false) { EditorScreen(
                             settings = settings,
                             restoration = activeRestoration,
                             sessionRestoreNotice = pendingSessionRestoreNotice,
@@ -965,7 +966,7 @@ class MainActivity : ComponentActivity() {
                             onOpenPrintCurves = { id, name ->
                                 curvesPrintId = id; curvesPrintName = name; navigateTo(Screen.CURVES_PRINT)
                             },
-                        )
+                        ) }
                     }
                     Screen.SETTINGS -> NavScaffold(stringResource(R.string.editor_action_settings), onBack = { navigateTo(Screen.EDITOR) }) {
                         SettingsScreen(
@@ -1076,6 +1077,18 @@ class MainActivity : ComponentActivity() {
         onOpenFilmCurves: (id: String, name: String) -> Unit,
         onOpenPrintCurves: (id: String, name: String) -> Unit,
     ) {
+        DisposableEffect(Unit) {
+            val bars = androidx.core.view.WindowCompat.getInsetsController(window, window.decorView)
+            val oldStatus = bars.isAppearanceLightStatusBars
+            val oldNavigation = bars.isAppearanceLightNavigationBars
+            bars.isAppearanceLightStatusBars = false
+            bars.isAppearanceLightNavigationBars = false
+            onDispose {
+                bars.isAppearanceLightStatusBars = oldStatus
+                bars.isAppearanceLightNavigationBars = oldNavigation
+            }
+        }
+
         val ctx = LocalContext.current.applicationContext
         // Editor-local UI waiters are cancelled when this destination leaves composition. Durable
         // source/recipe/export work is submitted to its process owner first; AppRoot reconciles
@@ -1472,6 +1485,19 @@ class MainActivity : ComponentActivity() {
         // active adjustment category (null = panel closed); hoisted to AppRoot so it
         // survives navigation to Settings/About and back.
         var activeCategory by activeCategoryState
+        var quickControls by rememberSaveable { mutableStateOf(activeCategoryState.value == null || activeCategoryState.value == Category.SIMULATION) }
+        var quickTab by rememberSaveable { mutableIntStateOf(0) }
+        LaunchedEffect(Unit) {
+            if (sourceUri == null && activeCategory == null) activeCategory = Category.SOURCE
+        }
+        var previousQuickSource by remember { mutableStateOf(sourceUri) }
+        LaunchedEffect(sourceUri) {
+            val sourceChanged = previousQuickSource != sourceUri
+            previousQuickSource = sourceUri
+            if (sourceChanged && sourceUri != null && sourceRenderAllowed) {
+                quickControls = true; quickTab = 0; activeCategory = Category.SIMULATION
+            }
+        }
 
         fun refreshPresets() { presetList = Presets.list(ctx) }
 
@@ -3616,7 +3642,58 @@ class MainActivity : ComponentActivity() {
                     // `when` below is not duplicated.
                     val panelContent: @Composable ColumnScope.() -> Unit = {
                         CompositionLocalProvider(LocalSliderInteraction provides sliderInteraction) {
-                        when (activeCategory) {
+                        if (quickControls && activeCategory != null && activeCategory != Category.SOURCE) {
+                            when (quickTab) {
+                                0 -> {
+                                    FilmReferenceGallery(filmGroups, state.filmProfile) { id ->
+                                        if (id != state.filmProfile) {
+                                            state.filmProfile = id
+                                            presetBaseJson = null; presetFullJson = null; presetAmount = 1f
+                                            state.scanFilm = StockCatalog.isReversalFilm(ctx, id)
+                                            previewTick++
+                                        }
+                                    }
+                                    if (presetFullJson != null) {
+                                        EnhancedSlider("预设强度", presetAmount * 100f, 0f..100f, { percent ->
+                                            val a = percent / 100f
+                                            val base = presetBaseJson; val full = presetFullJson
+                                            if (base != null && full != null) {
+                                                runCatching { Presets.decodeLook(PresetAmount.blend(org.json.JSONObject(base), org.json.JSONObject(full), a), state) }
+                                                presetAmount = a; previewTick++
+                                            }
+                                        }, default = 100f, decimals = 0)
+                                    }
+                                    TextButton(onClick = { quickControls = false; activeCategory = Category.PRESETS }) { Text("预设与风格强度 ›") }
+                                }
+                                1 -> QuickAdjustments(state)
+                                2 -> {
+                                    Text("质感 · 颗粒与光晕", style = MaterialTheme.typography.titleMedium)
+                                    GrainSection(state)
+                                    HalationSection(state)
+                                    GlareSection(state)
+                                }
+                            3 -> MasksSection(
+                                state,
+                                selectedIndex = selectedMaskIndex,
+                                onSelectedIndexChange = { selectedMaskIndex = it },
+                                onEditOnPhoto = { idx ->
+                                    selectedMaskIndex = idx
+                                    maskOverlayOpen = true
+                                },
+                                onSampleColor = { idx ->
+                                    selectedMaskIndex = idx
+                                    sampleLuminanceMode = false
+                                    sampleOverlayOpen = true
+                                },
+                                onSampleLuminance = { idx ->
+                                    selectedMaskIndex = idx
+                                    sampleLuminanceMode = true
+                                    sampleOverlayOpen = true
+                                },
+                            )
+
+                            }
+                        } else when (activeCategory) {
                             Category.INPUT -> InputSection(state, onEditCrop = { cropOverlayOpen = true },
                                 onPickNeutral = { sampleWbMode = true; sampleOverlayOpen = true })
                             Category.RAW_WB -> ImportRawSection(state, isRaw = sourceKind == SourceKind.RAW,
@@ -3951,6 +4028,7 @@ class MainActivity : ComponentActivity() {
                                                 }
                                                 sourceUri = null
                                                 sourceKind = SourceKind.DEMO
+                                                quickControls = true; quickTab = 0; activeCategory = Category.SIMULATION
                                                 sourceName = ctx.getString(R.string.editor_source_demo_name)
                                                 rotation = SourceRotation.NONE
                                                 sourceAuthorizationRequired = false
@@ -4020,8 +4098,7 @@ class MainActivity : ComponentActivity() {
                     // Measured height of the floating adjustment panel (narrow layout only). The
                     // preview's zoom control is inset by it so it never sits under the panel.
                     var panelHeightPx by remember { mutableIntStateOf(0) }
-                    val panelInset = if (!wide && activeCategory != null)
-                        with(LocalDensity.current) { panelHeightPx.toDp() } else 0.dp
+                    val panelInset = 0.dp
                     val previewRegion: @Composable () -> Unit = {
                         PreviewRegion(
                             controlsBottomInset = panelInset,
@@ -4060,7 +4137,7 @@ class MainActivity : ComponentActivity() {
                     // edits, which is the same question the rail's dot asks.
                     val dirty by remember(state) { derivedStateOf { dirtyCategories(state) } }
                     val resetActiveCategory: (() -> Unit)? =
-                        activeCategory?.takeIf { it in dirty }?.let { target ->
+                        activeCategory?.takeIf { !quickControls && it in dirty }?.let { target ->
                             {
                                 // A partial recipe carrying only this category's sections.
                                 // Presets.applyJson reads each section behind its own
@@ -4073,12 +4150,14 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     val categoryBar: @Composable () -> Unit = {
-                        CategoryBar(
-                            active = activeCategory,
-                            dirty = dirty,
-                            onSelect = { cat ->
-                                activeCategory = if (activeCategory == cat) null else cat
+                        EditorV2Navigation(
+                            active = activeCategory, quick = quickControls, tab = quickTab,
+                            onTab = { tab ->
+                                val target = listOf(Category.SIMULATION, Category.INPUT, Category.GRAIN, Category.MASKS)[tab]
+                                activeCategory = if (quickControls && quickTab == tab && activeCategory != null) null else target
+                                quickControls = true; quickTab = tab
                             },
+                            onProfessional = { category -> quickControls = false; activeCategory = category },
                         )
                     }
 
@@ -4094,7 +4173,7 @@ class MainActivity : ComponentActivity() {
                                     Modifier
                                         .fillMaxWidth()
                                         .weight(1f)
-                                        .heightIn(min = 220.dp),
+                                        ,
                                 ) { previewRegion() }
                                 // --- CATEGORY BAR (under the preview column) ---
                                 if (!chromeHidden) categoryBar()
@@ -4107,6 +4186,7 @@ class MainActivity : ComponentActivity() {
                             if (sideCategory != null) {
                                 SidePanel(
                                     category = sideCategory,
+                                    titleOverride = if (quickControls && sideCategory != Category.SOURCE) listOf("风格", "调色", "质感", "局部")[quickTab] else null,
                                     onDismiss = { activeCategory = null },
                                     onResetCategory = resetActiveCategory,
                                     content = panelContent,
@@ -4119,8 +4199,7 @@ class MainActivity : ComponentActivity() {
                             Box(
                                 Modifier
                                     .fillMaxWidth()
-                                    .weight(1f)
-                                    .heightIn(min = 220.dp),
+                                    .weight(1f),
                             ) {
                                 previewRegion()
 
@@ -4130,19 +4209,6 @@ class MainActivity : ComponentActivity() {
                                 // every frame. That per-frame resize churned the GLSurfaceView (it
                                 // forced GPU preview off) and jolted the CPU preview too; a
                                 // constant-height preview fixes both and unblocks GPU.
-                                PanelOverlay(
-                                    visible = activeCategory != null && !chromeHidden,
-                                    dimming = interacting,
-                                ) {
-                                    AdjustmentPanel(
-                                        modifier = Modifier.onSizeChanged { panelHeightPx = it.height },
-                                        category = activeCategory,
-                                        onDismiss = { activeCategory = null },
-                                        onResetCategory = resetActiveCategory,
-                                        content = panelContent,
-                                    )
-                                }
-
                                 // --- FLOATING VALUE READOUT ---
                                 // Drawn after the panel so it sits above the faded one.
                                 //
@@ -4163,6 +4229,13 @@ class MainActivity : ComponentActivity() {
                                 ) { SliderReadoutPill(sliderReadout) }
                             }
 
+                            // Stable, separate panel: the photograph is never behind controls.
+                            if (!chromeHidden && activeCategory != null) {
+                                AdjustmentPanel(category = activeCategory,
+                                    titleOverride = if (quickControls && activeCategory != Category.SOURCE) listOf("风格", "调色", "质感", "局部")[quickTab] else null,
+                                    onDismiss = { activeCategory = null },
+                                    onResetCategory = resetActiveCategory, content = panelContent)
+                            }
                             // --- BOTTOM CATEGORY BAR ---
                             if (!chromeHidden) categoryBar()
                         }
@@ -4310,6 +4383,15 @@ class MainActivity : ComponentActivity() {
                         exportRuntimeRunId = null
                         checkpointEditorSession()
                     },
+                    onView = lastExportShare?.let { (published, mime) ->
+                        {
+                            try {
+                                this@MainActivity.startActivity(Intent(Intent.ACTION_VIEW).setDataAndType(Uri.parse(published), mime).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION))
+                            } catch (_: ActivityNotFoundException) {
+                                status = "没有可查看此格式的应用，可使用分享。"
+                            }
+                        }
+                    },
                     onShare = lastExportShare?.let { (published, mime) ->
                         {
                             // Content URI + minimum read grant; the exported row's exact
@@ -4320,7 +4402,7 @@ class MainActivity : ComponentActivity() {
                                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                             }
                             try {
-                                ctx.startActivity(Intent.createChooser(send, ctx.getString(R.string.editor_share_export_title)))
+                                this@MainActivity.startActivity(Intent.createChooser(send, ctx.getString(R.string.editor_share_export_title)))
                             } catch (_: ActivityNotFoundException) {
                                 status = ctx.getString(R.string.editor_status_no_share_target)
                             }
@@ -4931,33 +5013,16 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 }
-                // Export / save
-                TextTooltip(stringResource(R.string.editor_tooltip_export_gallery)) {
-                    PressIconButton(onClick = onExport, enabled = canExport) {
-                        if (exporting) {
-                            val exportingDesc = stringResource(R.string.editor_exporting)
-                            CircularProgressIndicator(
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .semantics { contentDescription = exportingDesc },
-                                strokeWidth = 2.dp, color = Color.White,
-                            )
-                        } else {
-                            Icon(
-                                SpectraIcons.Export, contentDescription = stringResource(R.string.editor_action_export),
-                                tint = if (canExport) Color.White else Color.White.copy(alpha = 0.4f),
-                            )
-                        }
-                    }
+                Button(onClick = onExport, enabled = canExport,
+                    modifier = Modifier.heightIn(min = 48.dp), contentPadding = PaddingValues(horizontal = 14.dp)) {
+                    Text(if (exporting) "保存中" else "保存")
                 }
-                TextTooltip(stringResource(R.string.editor_action_settings)) {
-                    PressIconButton(onClick = onOpenSettings) {
-                        Icon(SpectraIcons.Settings, contentDescription = stringResource(R.string.editor_action_settings), tint = Color.White)
-                    }
-                }
-                TextTooltip(stringResource(R.string.editor_action_about)) {
-                    PressIconButton(onClick = onOpenAbout) {
-                        Icon(SpectraIcons.Help, contentDescription = stringResource(R.string.editor_action_about), tint = Color.White)
+                var menuOpen by remember { mutableStateOf(false) }
+                Box {
+                    TextButton(onClick = { menuOpen = true }, modifier = Modifier.size(48.dp)) { Text("⋮") }
+                    DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                        DropdownMenuItem(text = { Text(stringResource(R.string.editor_action_settings)) }, onClick = { menuOpen = false; onOpenSettings() })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.editor_action_about)) }, onClick = { menuOpen = false; onOpenAbout() })
                     }
                 }
             }
@@ -4997,6 +5062,7 @@ class MainActivity : ComponentActivity() {
         // described and the tap-to-pick gesture gets a custom action at the frame centre. The
         // ROI drag is bound to the live zoom state inside ZoomableImage and has no safe
         // one-shot equivalent, so it is described only. Semantics-only: no gesture changes.
+        var showOriginal by rememberSaveable { mutableStateOf(false) }
         val previewDesc = when {
             preview == null -> stringResource(R.string.editor_preview_desc_empty)
             compareMode -> stringResource(R.string.editor_preview_desc_compare)
@@ -5043,8 +5109,11 @@ class MainActivity : ComponentActivity() {
             // double-tap (continue from fit), 2f for the explicit "+" so it lands already zoomed.
             var gpuZoomInitial by remember { mutableFloatStateOf(1f) }
             val gpuActive = gpuEnabled && gpuProxy != null && gpuLut != null &&
-                !compareMode && !gpuBroken && !gpuZoomHandoff
+                !compareMode && !showOriginal && !gpuBroken && !gpuZoomHandoff
             when {
+                showOriginal && before != null -> ZoomableImage(
+                    bitmap = before, modifier = Modifier.fillMaxSize(), peek = null,
+                )
                 gpuActive -> GpuPreviewSurface(
                     proxy = gpuProxy!!,
                     lut = gpuLut!!,
@@ -5116,44 +5185,36 @@ class MainActivity : ComponentActivity() {
             Row(
                 Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 10.dp),
+                    .padding(bottom = 10.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color.Black.copy(alpha = 0.82f))
+                    .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                TextTooltip(stringResource(R.string.editor_histogram)) {
-                    CircleScrimButton(onClick = onToggleHistogram, active = showHistogram, toggle = true) {
-                        Icon(
-                            SpectraIcons.Histogram, contentDescription = stringResource(R.string.editor_toggle_histogram),
-                            tint = Color.White,
-                        )
+                listOf("原图", "效果", "分屏").forEachIndexed { index, title ->
+                    val chosen = when(index) { 0 -> showOriginal; 1 -> !showOriginal && !compareMode; else -> compareMode && !showOriginal }
+                    TextButton(
+                        onClick = {
+                            showOriginal = index == 0
+                            if ((index == 2) != compareMode) onToggleCompare()
+                        },
+                        modifier = Modifier.heightIn(min = 48.dp),
+                        colors = ButtonDefaults.textButtonColors(contentColor = if (chosen) MaterialTheme.colorScheme.primary else Color.White),
+                    ) { Text(if(chosen) "● $title" else title) }
+                }
+
+                var more by remember { mutableStateOf(false) }
+                Box {
+                    TextButton(onClick = { more = true }, modifier = Modifier.heightIn(min = 48.dp)) { Text("更多") }
+                    DropdownMenu(expanded = more, onDismissRequest = { more = false }) {
+                        DropdownMenuItem(text = { Text("直方图") }, onClick = { more = false; onToggleHistogram() })
+                        DropdownMenuItem(text = { Text("100% 放大镜") }, onClick = { more = false; onOpenMagnifier() })
+                        DropdownMenuItem(text = { Text("裁剪与变换") }, onClick = { more = false; onEditCrop() })
+                        DropdownMenuItem(text = { Text("旋转 90°") }, onClick = { more = false; onRotate() })
                     }
                 }
-                TextTooltip(stringResource(R.string.editor_magnifier_tooltip)) {
-                    CircleScrimButton(onClick = onOpenMagnifier) {
-                        Icon(
-                            SpectraIcons.Loupe, contentDescription = stringResource(R.string.editor_magnifier),
-                            tint = Color.White,
-                        )
-                    }
-                }
-                TextTooltip(stringResource(R.string.editor_compare)) {
-                    CircleScrimButton(onClick = onToggleCompare, active = compareMode, toggle = true) {
-                        Icon(
-                            SpectraIcons.Display, contentDescription = stringResource(R.string.editor_compare),
-                            tint = Color.White,
-                        )
-                    }
-                }
-                TextTooltip(stringResource(R.string.editor_crop_transform_tooltip)) {
-                    CircleScrimButton(onClick = onEditCrop) {
-                        Icon(SpectraIcons.Crop, contentDescription = stringResource(R.string.editor_crop_transform), tint = Color.White)
-                    }
-                }
-                TextTooltip(stringResource(R.string.editor_rotate_90)) {
-                    CircleScrimButton(onClick = onRotate) {
-                        Icon(SpectraIcons.Rotate, contentDescription = stringResource(R.string.editor_rotate_90), tint = Color.White)
-                    }
-                }
+
             }
         }
     }
@@ -5431,6 +5492,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun AdjustmentPanel(
         category: Category?,
+        titleOverride: String? = null,
         onDismiss: () -> Unit,
         modifier: Modifier = Modifier,
         // Non-null only when this category actually holds edits. The editor had a reset for one
@@ -5440,8 +5502,8 @@ class MainActivity : ComponentActivity() {
         onResetCategory: (() -> Unit)? = null,
         content: @Composable ColumnScope.() -> Unit,
     ) {
-        val maxH = (localConfigurationHeightDp() * 0.38f).dp
-        val title = category?.let { stringResource(it.labelRes) } ?: ""
+        val maxH = (localConfigurationHeightDp() * 0.42f).dp
+        val title = titleOverride ?: (category?.let { stringResource(it.labelRes) } ?: "")
         val panelTitle = stringResource(R.string.editor_panel_title, title)
         val closeLabel = stringResource(R.string.editor_close_panel_named, title)
         val closeAction = stringResource(R.string.editor_close)
@@ -5487,7 +5549,7 @@ class MainActivity : ComponentActivity() {
                                 .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)),
                         )
                         Text(
-                            title,
+                            "$title · 下滑收起",
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(vertical = 6.dp),
@@ -5527,11 +5589,12 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun SidePanel(
         category: Category,
+        titleOverride: String? = null,
         onDismiss: () -> Unit,
         onResetCategory: (() -> Unit)? = null,
         content: @Composable ColumnScope.() -> Unit,
     ) {
-        val title = stringResource(category.labelRes)
+        val title = titleOverride ?: stringResource(category.labelRes)
         val panelTitle = stringResource(R.string.editor_panel_title, title)
         val closeLabel = stringResource(R.string.editor_close_panel_named, title)
         Surface(
@@ -6217,14 +6280,14 @@ class MainActivity : ComponentActivity() {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(onClick = onPickPhoto, modifier = Modifier.weight(1f)) {
                 ButtonIcon(SpectraIcons.OpenPhoto)
-                Text(stringResource(R.string.editor_source_pick_photo))
+                Text("选择照片")
             }
             Button(onClick = onOpenRaw, modifier = Modifier.weight(1f)) {
                 ButtonIcon(SpectraIcons.ImportRaw)
                 Text(stringResource(R.string.editor_source_open_raw))
             }
         }
-        OutlinedButton(onClick = onUseDemo, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.editor_source_use_demo)) }
+        OutlinedButton(onClick = onUseDemo, modifier = Modifier.fillMaxWidth()) { Text("试用示例") }
 
         FilterChip(
             selected = showHistogram,
@@ -6292,6 +6355,7 @@ class MainActivity : ComponentActivity() {
         done: Boolean,
         onDismiss: () -> Unit,
         onShare: (() -> Unit)? = null,
+        onView: (() -> Unit)? = null,
         onCancel: () -> Unit,
     ) {
         // This overlay swallows every pointer event, so Back is the only system gesture that
@@ -6340,6 +6404,7 @@ class MainActivity : ComponentActivity() {
                         color = Color.White.copy(alpha = 0.8f),
                         style = MaterialTheme.typography.bodyMedium,
                     )
+                    if (onView != null) Button(onClick = onView) { Text("查看照片") }
                     Button(onClick = onDismiss) { Text(stringResource(R.string.editor_export_done)) }
                     if (onShare != null) {
                         Button(onClick = onShare) { Text(stringResource(R.string.editor_export_share)) }
@@ -7160,3 +7225,4 @@ internal fun incomingImageUri(intent: Intent?): Uri? = when (intent?.action) {
     }
     else -> null
 }?.takeIf { it.scheme == ContentResolver.SCHEME_CONTENT }
+

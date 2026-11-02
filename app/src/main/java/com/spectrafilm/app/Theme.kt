@@ -88,7 +88,13 @@ internal object SpektraBrand {
  */
 private fun spektraLightScheme(): ColorScheme = lightColorScheme()
 
-private fun spektraDarkScheme(): ColorScheme = darkColorScheme()
+private fun spektraDarkScheme(): ColorScheme = darkColorScheme(
+    primary = Color(0xFFF2AEB5), onPrimary = Color(0xFF251317),
+    primaryContainer = Color(0xFF543238), onPrimaryContainer = Color(0xFFFFDADD),
+    secondaryContainer = Color(0xFF543238), onSecondaryContainer = Color(0xFFFFDADD),
+    surface = Color(0xFF121214), background = Color(0xFF0B0B0D),
+    onSurface = Color(0xFFF0ECEE), onSurfaceVariant = Color(0xFFCAC0C3),
+)
 
 /**
  * Wrap the whole app. [dark] comes from the user's [ThemeMode] resolved against the system setting;
@@ -105,7 +111,7 @@ internal fun SpektraTheme(
     val scheme = when {
         // Capability is checked separately from the preference, so a device that cannot do
         // Material You falls back instead of throwing, and the stored preference survives.
-        dynamicColor && dynamicColorSupported ->
+        !dark && dynamicColor && dynamicColorSupported ->
             if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         dark -> spektraDarkScheme()
         else -> spektraLightScheme()

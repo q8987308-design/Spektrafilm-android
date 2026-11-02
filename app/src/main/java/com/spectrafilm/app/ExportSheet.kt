@@ -28,6 +28,11 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.material3.TextButton
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
@@ -54,6 +59,7 @@ fun ExportSheet(
     // Dropdown's `display` is a plain (non-composable) lambda, so stringResource cannot go inside
     // it. LocalResources is the lint-approved read and, unlike LocalContext.current.getString,
     // recomposes when the configuration changes (locale, font scale).
+    var advanced by remember { mutableStateOf(false) }
     val resources = LocalResources.current
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
@@ -77,6 +83,12 @@ fun ExportSheet(
             )
             val isSceneLinear = options.format == ExportFormat.SCENE_LINEAR_TIFF
 
+            Text("保存位置：相册 · Pictures/Spektrafilm", style = MaterialTheme.typography.bodyMedium)
+            Text("${resources.getString(options.format.labelRes())} · ${resources.getString(options.size.labelRes)} · ${resources.getString(colorSpace.labelRes())}", style = MaterialTheme.typography.bodySmall)
+            TextButton(onClick = { advanced = !advanced }) {
+                Text(if (advanced) "收起高级设置" else "高级设置：格式、尺寸与色彩空间")
+            }
+            if (advanced) {
             // --- Format (+ format-specific quality) ---
             Dropdown(
                 label = stringResource(R.string.tool_export_format),
@@ -187,12 +199,13 @@ fun ExportSheet(
             }
 
             // --- Actions ---
+            }
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedButton(onClick = onDismiss, modifier = Modifier.weight(1f)) {
                     Text(stringResource(R.string.tool_cancel))
                 }
                 Button(onClick = onExport, modifier = Modifier.weight(1f)) {
-                    Text(stringResource(R.string.tool_export_action))
+                    Text("保存到相册")
                 }
             }
 

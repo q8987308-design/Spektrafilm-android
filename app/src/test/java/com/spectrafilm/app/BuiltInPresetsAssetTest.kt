@@ -162,7 +162,7 @@ class BuiltInPresetsAssetTest {
                 .map { arr.getJSONObject(it) }
                 .first { it.optString("id") == id }
                 .optString("group")
-            assertEquals("$id scans as positive but is not in the Slide group", "Slide", group)
+            assertEquals("$id scans as positive but is not in the translated Slide display group", "反转片", group)
         }
     }
 
@@ -188,3 +188,4 @@ class BuiltInPresetsAssetTest {
         assertEquals("", BuiltInPresets.specLine("", "Some Paper", false, "positive"))
     }
 }
+

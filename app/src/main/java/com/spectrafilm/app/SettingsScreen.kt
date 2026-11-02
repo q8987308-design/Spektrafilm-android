@@ -209,6 +209,7 @@ fun SettingsScreen(
 
         // --- Updates & diagnostics ---
         SettingsCard(stringResource(R.string.screen_settings_updates_heading)) {
+            Text("当前为独立签名的简体中文版。官方安装包不能覆盖本版本；请使用同签名的汉化更新包，避免卸载丢失记录。", style = MaterialTheme.typography.bodySmall)
             Button(
                 onClick = {
                     if (checking) return@Button
